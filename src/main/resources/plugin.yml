@@ -1,0 +1,5 @@
+name: AttackSpeedModifier
+version: '${version}'
+main: com.zhaoch23.attackspeedmodifier.AttackSpeedModifier
+author: zhaoch23
+api-version: 1.12.2

@@ -1,0 +1,85 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.zhaoch23'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "spigotmc-repo"
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+    // compileOnly "org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT"
+    compileOnly name: 'spigot-1.12-R0.1-SNAPSHOT'
+}
+
+sourceSets {
+    api {
+        java {
+            srcDirs = ['src/main/java']
+            include 'com/zhaoch23/attackspeedmodifier/api/**'
+        }
+        compileClasspath = sourceSets.main.compileClasspath
+    }
+}
+
+tasks.register('apiJar', Jar) {
+    from sourceSets.api.output
+    archiveBaseName.set project.name
+    archiveClassifier.set 'api'
+    archiveVersion.set version
+    archiveExtension.set 'jar'
+}
+
+javadoc {
+    title = project.name
+    include 'com/zhaoch23/attackspeedmodifier/api/**'
+
+    options {
+        encoding = 'UTF-8'
+    }
+}
+
+apiJar {
+
+}
+
+jar.dependsOn apiJar
+
+def targetJavaVersion = 8
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release = targetJavaVersion
+    }
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
